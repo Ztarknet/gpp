@@ -1,0 +1,6 @@
+{
+  "prover_params": {
+    "version": "1.0",
+    "note": "This is a placeholder prover parameters file. In production, this would contain the actual prover configuration."
+  }
+}
