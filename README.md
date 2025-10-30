@@ -1,2 +1,2 @@
 # gpp
-Generate, Prove, Post Madara Blocks to Zcash
+Experiments with Generating, Proving and Posting Madara blocks to to Zcash
