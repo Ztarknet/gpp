@@ -6,7 +6,6 @@ description = "Generate PIE and Proof - A CLI utility for generating PIE using s
 authors = ["maciejka"]
 
 [dependencies]
-# generate-pie = { git = "https://github.com/keep-starknet-strange/snos", rev = "44e82ff35277fdc102a5613975e02975a2b111e4" }
 clap = { version = "4", features = ["derive"] }
 anyhow = "1"
 serde = { version = "1", features = ["derive"] }

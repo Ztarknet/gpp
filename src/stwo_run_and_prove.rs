@@ -13,6 +13,7 @@ use crate::cmd_utils::execute_with_streaming_output;
 /// * `pie_path` - Path to the PIE ZIP file
 /// * `prover_params_path` - Path to the prover parameters JSON
 /// * `output_dir` - Directory for output files
+/// * `verbose` - Whether to stream command output to terminal
 ///
 /// # Returns
 /// Path to the generated proof file
@@ -21,6 +22,7 @@ pub async fn stwo_run_and_prove(
     pie_path: &Path,
     prover_params_path: &Path,
     output_dir: &Path,
+    verbose: bool,
 ) -> Result<PathBuf> {
     info!("Creating proof for PIE: {}", pie_path.display());
 
@@ -35,15 +37,20 @@ pub async fn stwo_run_and_prove(
     });
 
     let program_input_path = output_dir.join("program_input.json");
-    std::fs::write(&program_input_path, serde_json::to_string_pretty(&program_input)?)
-        .context("Failed to write program input JSON")?;
+    std::fs::write(
+        &program_input_path,
+        serde_json::to_string_pretty(&program_input)?,
+    )
+    .context("Failed to write program input JSON")?;
 
-    debug!("Program input JSON created: {}", program_input_path.display());
+    debug!(
+        "Program input JSON created: {}",
+        program_input_path.display()
+    );
 
     // Create proofs directory
     let proofs_dir = output_dir.join("proofs");
-    std::fs::create_dir_all(&proofs_dir)
-        .context("Failed to create proofs directory")?;
+    std::fs::create_dir_all(&proofs_dir).context("Failed to create proofs directory")?;
 
     // Check if stwo_run_and_prove is available
     if let Err(_) = Command::new("stwo_run_and_prove").arg("--help").output() {
@@ -72,7 +79,8 @@ pub async fn stwo_run_and_prove(
     debug!("Program path: {:?}", program_path);
     debug!("Running command: {:?}", cmd);
 
-    let (elapsed, stderr_output) = execute_with_streaming_output(&mut cmd, "stwo_run_and_prove")?;
+    let (elapsed, stderr_output) =
+        execute_with_streaming_output(&mut cmd, "stwo_run_and_prove", verbose)?;
 
     info!("Elapsed time: {:.2}s", elapsed.as_secs_f64());
 
@@ -126,13 +134,24 @@ fn find_proof_file(proofs_dir: &Path) -> Result<PathBuf> {
         .collect();
 
     if proof_files.is_empty() {
-        return Err(anyhow::anyhow!("No proof files found in {}", proofs_dir.display()));
+        return Err(anyhow::anyhow!(
+            "No proof files found in {}",
+            proofs_dir.display()
+        ));
     }
 
     // Sort by modification time (newest first)
     proof_files.sort_by(|a, b| {
-        let a_time = a.metadata().ok().and_then(|m| m.modified().ok()).unwrap_or(std::time::UNIX_EPOCH);
-        let b_time = b.metadata().ok().and_then(|m| m.modified().ok()).unwrap_or(std::time::UNIX_EPOCH);
+        let a_time = a
+            .metadata()
+            .ok()
+            .and_then(|m| m.modified().ok())
+            .unwrap_or(std::time::UNIX_EPOCH);
+        let b_time = b
+            .metadata()
+            .ok()
+            .and_then(|m| m.modified().ok())
+            .unwrap_or(std::time::UNIX_EPOCH);
         b_time.cmp(&a_time)
     });
 

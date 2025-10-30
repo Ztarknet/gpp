@@ -25,12 +25,14 @@ impl Network {
         match self {
             Network::Sepolia => NetworkConfig {
                 rpc_url: "https://pathfinder-sepolia.d.karnot.xyz",
-                strk_fee_token: "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+                strk_fee_token:
+                    "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
                 eth_fee_token: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
             },
             Network::Mainnet => NetworkConfig {
                 rpc_url: "https://pathfinder-mainnet.d.karnot.xyz",
-                strk_fee_token: "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+                strk_fee_token:
+                    "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
                 eth_fee_token: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
             },
         }
@@ -46,7 +48,9 @@ impl Network {
 
 #[derive(Parser)]
 #[command(name = "gpp")]
-#[command(about = "Generate PIE and Proof - A CLI utility for generating PIE using snos and creating proofs using stwo_run_and_prove")]
+#[command(
+    about = "Generate PIE and Proof - A CLI utility for generating PIE using snos and creating proofs using stwo_run_and_prove"
+)]
 #[command(version)]
 struct Cli {
     /// Block number or range (e.g., "123" or "100-110")
@@ -106,14 +110,14 @@ async fn main() -> anyhow::Result<()> {
 
     // Step 1: Generate PIE
     info!("=== Step 1: Generating PIE ===");
-    
+
     // Format block numbers to comma-separated format
     let block_range = generate_pie::format_block_numbers(&cli.block_numbers)?;
-    
+
     // Create output path for PIE file
     let pie_filename = format!("pie_{}_{}.zip", network_name, cli.block_numbers);
     let pie_path = cli.output_dir.join(pie_filename);
-    
+
     // Call generate-pie binary
     generate_pie::generate_pie(
         &block_range,
@@ -122,8 +126,10 @@ async fn main() -> anyhow::Result<()> {
         network_name,
         network_config.strk_fee_token,
         network_config.eth_fee_token,
-    ).await?;
-    
+        cli.verbose,
+    )
+    .await?;
+
     info!("PIE generated successfully: {}", pie_path.display());
 
     // Step 2: Create proof
@@ -133,7 +139,9 @@ async fn main() -> anyhow::Result<()> {
         &pie_path,
         &cli.prover_params,
         &cli.output_dir,
-    ).await?;
+        cli.verbose,
+    )
+    .await?;
     info!("Proof created successfully: {}", proof_result.display());
 
     // Clean up intermediate files if requested
