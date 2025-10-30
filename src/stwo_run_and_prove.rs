@@ -6,6 +6,9 @@ use std::process::Command;
 
 use crate::cmd_utils::execute_with_streaming_output;
 
+const BOOTLOADER_HINTS_REPO_URL: &str = "ssh://git@github.com/starkware-libs/bootloader-hints.git";
+const BOOTLOADER_HINTS_BRANCH: &str = "main";
+
 /// Create proof using stwo_run_and_prove from bootloader-hints
 ///
 /// # Arguments
@@ -56,7 +59,9 @@ pub async fn stwo_run_and_prove(
     if let Err(_) = Command::new("stwo_run_and_prove").arg("--help").output() {
         return Err(anyhow::anyhow!(
             "stwo_run_and_prove not found. Please install it first:\n\
-            cargo +nightly-2025-07-14 install --git ssh://git@github.com/starkware-libs/bootloader-hints.git --branch main stwo_run_and_prove"
+            cargo +nightly-2025-07-14 install --git {} --branch {} stwo_run_and_prove",
+            BOOTLOADER_HINTS_REPO_URL,
+            BOOTLOADER_HINTS_BRANCH
         ));
     }
 

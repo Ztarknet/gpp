@@ -5,6 +5,9 @@ use std::process::Command;
 
 use crate::cmd_utils::execute_with_streaming_output;
 
+const SNOS_REPO_URL: &str = "https://github.com/keep-starknet-strange/snos";
+const SNOS_REPO_REV: &str = "44e82ff35277fdc102a5613975e02975a2b111e4";
+
 /// Generate PIE using snos generate-pie binary
 ///
 /// # Arguments
@@ -33,7 +36,9 @@ pub async fn generate_pie(
     if !is_generate_pie_available().await {
         return Err(anyhow::anyhow!(
             "generate-pie binary not found. Please install it first:\n\
-            cargo install --git https://github.com/keep-starknet-strange/snos --rev 44e82ff35277fdc102a5613975e02975a2b111e4 generate-pie"
+            cargo install --git {} --rev {} generate-pie",
+            SNOS_REPO_URL,
+            SNOS_REPO_REV
         ));
     }
 
