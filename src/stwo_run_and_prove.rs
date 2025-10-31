@@ -5,8 +5,10 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use crate::cmd_utils::execute_with_streaming_output;
+use crate::proof_utils::{load_proof_from_file, serialize_proof_to_file};
 
-const BOOTLOADER_HINTS_REPO_URL: &str = "ssh://git@github.com/starkware-libs/bootloader-hints.git";
+const BOOTLOADER_HINTS_REPO_URL: &str =
+    "ssh://git@github.com/starkware-libs/bootloader-hints.git";
 const BOOTLOADER_HINTS_BRANCH: &str = "main";
 
 /// Create proof using stwo_run_and_prove from bootloader-hints
@@ -53,7 +55,8 @@ pub async fn stwo_run_and_prove(
 
     // Create proofs directory
     let proofs_dir = output_dir.join("proofs");
-    std::fs::create_dir_all(&proofs_dir).context("Failed to create proofs directory")?;
+    std::fs::create_dir_all(&proofs_dir)
+        .context("Failed to create proofs directory")?;
 
     // Check if stwo_run_and_prove is available
     if let Err(_) = Command::new("stwo_run_and_prove").arg("--help").output() {
@@ -79,6 +82,8 @@ pub async fn stwo_run_and_prove(
         .arg(prover_params_path)
         .arg("--proofs_dir")
         .arg(&proofs_dir)
+        .arg("--proof-format")
+        .arg("json")
         .arg("--verify");
 
     debug!("Program path: {:?}", program_path);
@@ -95,8 +100,20 @@ pub async fn stwo_run_and_prove(
     // Find the generated proof file
     let proof_file = find_proof_file(&proofs_dir)?;
 
-    info!("Proof created successfully: {}", proof_file.display());
-    Ok(proof_file)
+    // Load proof from file
+    let proof = load_proof_from_file(&proof_file)?;
+
+    // Serialize proof to file
+    let compressed_proof_file = proofs_dir.join("proof.bz");
+    serialize_proof_to_file(&proof, &compressed_proof_file)?;
+
+    // Get file size for reporting
+    if let Ok(metadata) = std::fs::metadata(&compressed_proof_file) {
+        let size_mb = metadata.len() as f64 / (1024.0 * 1024.0);
+        info!("Proof size: {:.2} MB", size_mb);
+    }
+
+    Ok(compressed_proof_file)
 }
 
 /// Parse output from the time command and stwo_run_and_prove
@@ -161,12 +178,6 @@ fn find_proof_file(proofs_dir: &Path) -> Result<PathBuf> {
     });
 
     let proof_file = proof_files[0].clone();
-
-    // Get file size for reporting
-    if let Ok(metadata) = std::fs::metadata(&proof_file) {
-        let size_mb = metadata.len() as f64 / (1024.0 * 1024.0);
-        info!("Proof size: {:.2} MB", size_mb);
-    }
 
     Ok(proof_file)
 }

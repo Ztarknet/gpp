@@ -5,10 +5,12 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
-/// Execute a command with streaming stdout and stderr, while also capturing stderr
+/// Execute a command with streaming stdout and stderr, while also capturing
+/// stderr
 ///
-/// This function optionally streams both stdout and stderr in real-time to the terminal,
-/// while also capturing stderr for error handling and metrics parsing.
+/// This function optionally streams both stdout and stderr in real-time to the
+/// terminal, while also capturing stderr for error handling and metrics
+/// parsing.
 ///
 /// # Arguments
 /// * `cmd` - The command to execute
@@ -105,7 +107,8 @@ pub fn execute_with_streaming_output(
     let elapsed = start_time.elapsed();
 
     // Extract captured stderr
-    let captured_stderr = stderr_output.lock().map(|s| s.clone()).unwrap_or_default();
+    let captured_stderr =
+        stderr_output.lock().map(|s| s.clone()).unwrap_or_default();
 
     if !status.success() {
         return Err(anyhow::anyhow!(

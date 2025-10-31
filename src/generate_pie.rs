@@ -11,10 +11,12 @@ const SNOS_REPO_REV: &str = "44e82ff35277fdc102a5613975e02975a2b111e4";
 /// Generate PIE using snos generate-pie binary
 ///
 /// # Arguments
-/// * `block_range` - Block numbers in comma-separated format (e.g., "100,101,102")
+/// * `block_range` - Block numbers in comma-separated format (e.g.,
+///   "100,101,102")
 /// * `output_path` - Path where the PIE file should be saved
 /// * `rpc_url` - RPC endpoint URL
-/// * `network` - Network name (sepolia, mainnet, paradex-testnet, paradex-mainnet)
+/// * `network` - Network name (sepolia, mainnet, paradex-testnet,
+///   paradex-mainnet)
 /// * `strk_fee_token` - STRK fee token address
 /// * `eth_fee_token` - ETH fee token address
 /// * `verbose` - Whether to stream command output to terminal
@@ -125,7 +127,8 @@ pub fn format_block_numbers(input: &str) -> Result<String> {
             ));
         }
 
-        let blocks: Vec<String> = (start..=end).map(|n| n.to_string()).collect();
+        let blocks: Vec<String> =
+            (start..=end).map(|n| n.to_string()).collect();
         Ok(blocks.join(","))
     } else {
         // Single block number
